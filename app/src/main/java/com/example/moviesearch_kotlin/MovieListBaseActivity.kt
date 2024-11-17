@@ -39,16 +39,7 @@ import coil.compose.rememberAsyncImagePainter
 
 
 open class MovieListBaseActivity : ComponentActivity() {
-    var progressBar: ProgressBar? = null
-    var movies: List<Movie> = listOf(Movie("title","year","","id"))
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        isLoading(true)
-        setContent {
-            ListMovie()
-        }
-    }
+    open var movies: MutableList<Movie> = mutableListOf()
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Preview
@@ -65,7 +56,6 @@ open class MovieListBaseActivity : ComponentActivity() {
                 )
             }
         ) { innerPadding ->
-            isLoading(true)
             LazyColumn (modifier = Modifier.padding(innerPadding)){
                 items(items = movies){ movie->
                     MoviePosterCard(movie)
@@ -86,7 +76,7 @@ open class MovieListBaseActivity : ComponentActivity() {
                 .padding(16.dp)
         ) {
             Image(
-                painter = rememberAsyncImagePainter("https://i1.hdslb.com/bfs/archive/a048a348163675114c696168d7bf4308c49f4696.jpg@672w_378h_1c_!web-home-common-cover.avif"),
+                painter = rememberAsyncImagePainter(posterUrl),
                 contentDescription = null,
                 modifier = Modifier
                     .width(160.dp)
@@ -120,12 +110,6 @@ open class MovieListBaseActivity : ComponentActivity() {
             }
         }
     }
-
-
-    fun isLoading(p: Boolean) {
-        // runOnUiThread { progressBar.visibility = if (p) View.VISIBLE else View.GONE }
-    }
-
 }
 
 
