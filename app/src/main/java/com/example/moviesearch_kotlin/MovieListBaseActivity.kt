@@ -1,7 +1,6 @@
 package com.example.moviesearch_kotlin
 
-import android.os.Bundle
-import android.widget.ProgressBar
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -31,11 +30,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.moviesearch_kotlin.model.Movie
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.rememberAsyncImagePainter
-
 
 
 open class MovieListBaseActivity : ComponentActivity() {
@@ -44,7 +49,34 @@ open class MovieListBaseActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Preview
     @Composable
-    fun ListMovie(){
+    fun ListMovie() {
+        val listState = rememberLazyListState()
+        val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+        val itemCount by remember { derivedStateOf { listState.layoutInfo.totalItemsCount } }
+        var lastItemCount by remember { mutableStateOf(itemCount - 1) }
+        // val atBottom by remember { derivedStateOf { lastVisibleItem >= itemCount - 1 } }
+
+        LaunchedEffect(lastVisibleItem) {
+            Log.d(
+                "tag",
+                "lastVisibleItem:$lastVisibleItem itemCount:$itemCount"
+            )
+            Log.d(
+                "tag",
+                "lastItemCount:$lastItemCount"
+            )
+        }
+
+
+        if (lastItemCount != itemCount && lastVisibleItem >= itemCount - 1) {
+            // 加载出来之前会先触发一次 当作特性了
+//            Log.d(
+//                "tag",
+//                "lastVisibleItem:$lastVisibleItem itemCount:$itemCount"
+//            )
+            lastItemCount = itemCount
+            loadMore()
+        }
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -56,8 +88,11 @@ open class MovieListBaseActivity : ComponentActivity() {
                 )
             }
         ) { innerPadding ->
-            LazyColumn (modifier = Modifier.padding(innerPadding)){
-                items(items = movies){ movie->
+            LazyColumn(
+                modifier = Modifier.padding(innerPadding),
+                state = listState
+            ) {
+                items(items = movies) { movie ->
                     MoviePosterCard(movie)
                 }
             }
@@ -83,7 +118,6 @@ open class MovieListBaseActivity : ComponentActivity() {
                     .height(120.dp)
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop,
-
             )
 
             Spacer(Modifier.padding(8.dp))
@@ -110,6 +144,8 @@ open class MovieListBaseActivity : ComponentActivity() {
             }
         }
     }
+
+    open fun loadMore() {}
 }
 
 

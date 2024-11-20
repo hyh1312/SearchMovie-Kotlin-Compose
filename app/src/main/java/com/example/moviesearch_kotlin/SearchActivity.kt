@@ -2,31 +2,34 @@ package com.example.moviesearch_kotlin
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import com.example.moviesearch_kotlin.model.Movie
 import com.example.moviesearch_kotlin.network.OnlineSearchUtil
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
 class SearchActivity : MovieListBaseActivity() {
     override var movies: MutableList<Movie> = mutableListOf()
-    var page:Int = 1
+    var page: Int = 0
+    val context = this
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         query = intent.getStringExtra("query") ?: ""
-        GetMovies()
-        setContent{
+        setContent {
             ListMovie()
         }
     }
+
     var query: String = ""
-    fun GetMovies() = runBlocking {
-        try{
-            movies = OnlineSearchUtil.searchMoviesByPage(query,page)
+    override fun loadMore(): Unit = runBlocking {
+        try {
+            movies += OnlineSearchUtil.searchMoviesByPage(query, page + 1)
+            page++;
         } catch (e: Exception) {
-            Log.d("TAG","Error: ${e.message}")
+            Toast.makeText(context, "bottom", Toast.LENGTH_SHORT).show()
+            Log.d("TAG", "Error: ${e.message}")
         }
     }
 }
