@@ -1,5 +1,6 @@
 package com.example.moviesearch_kotlin.network
 
+import android.util.Log
 import com.example.moviesearch_kotlin.model.Detail
 import com.example.moviesearch_kotlin.model.Movie
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -14,7 +15,7 @@ import kotlin.coroutines.resumeWithException
 object OnlineSearchUtil {
     private const val URL = "https://www.omdbapi.com/?apikey=858fc655"
     private val client = OkHttpClient()
-
+    var stopLoading: () -> Unit = { Log.d("tag", "wtf?") }
 
     private suspend fun fetch(url: String): Response = suspendCancellableCoroutine { cont ->
         val request = Request.Builder().url(url).get().build()
@@ -39,6 +40,7 @@ object OnlineSearchUtil {
     suspend fun searchMoviesByPage(name: String, page: Int): MutableList<Movie> {
         val url = "$URL&s=$name&page=$page"
         val response = fetch(url)
+        stopLoading()
         return parseMovieList(response)
     }
 
@@ -69,10 +71,8 @@ object OnlineSearchUtil {
         val jsonData = response.body?.string() ?: throw Exception("Empty response body")
         // val movieList = mutableListOf<Movie>()
         val movie = Json.decodeFromString<Movie>(jsonData)
-
         return mutableListOf(movie)
     }
-
 
 
     private fun parseDetail(response: Response): Detail {
