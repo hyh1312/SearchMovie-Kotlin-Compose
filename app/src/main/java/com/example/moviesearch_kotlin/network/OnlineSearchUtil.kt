@@ -3,6 +3,7 @@ package com.example.moviesearch_kotlin.network
 import android.util.Log
 import com.example.moviesearch_kotlin.model.Detail
 import com.example.moviesearch_kotlin.model.Movie
+import com.example.moviesearch_kotlin.model.MovieList
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -16,6 +17,7 @@ object OnlineSearchUtil {
     private const val URL = "https://www.omdbapi.com/?apikey=858fc655"
     private val client = OkHttpClient()
     var stopLoading: () -> Unit = { Log.d("tag", "wtf?") }
+    val Format = Json { ignoreUnknownKeys = true }
 
     private suspend fun fetch(url: String): Response = suspendCancellableCoroutine { cont ->
         val request = Request.Builder().url(url).get().build()
@@ -37,7 +39,7 @@ object OnlineSearchUtil {
         })
     }
 
-    suspend fun searchMoviesByPage(name: String, page: Int): MutableList<Movie> {
+    suspend fun searchMoviesByPage(name: String, page: Int): List<Movie> {
         val url = "$URL&s=$name&page=$page"
         val response = fetch(url)
         stopLoading()
@@ -50,28 +52,31 @@ object OnlineSearchUtil {
         return parseDetail(response)
     }
 
-    private fun parseMovieList(response: Response): MutableList<Movie> {
-        val jsonData = response.body?.string() ?: throw Exception("Empty response body")
-        val jsonObject = JSONObject(jsonData)
-        val searchArray = jsonObject.getJSONArray("Search")
-        val movieList = mutableListOf<Movie>()
+    /*
+        private fun parseMovieList_Old(response: Response): List<Movie> {
+            val jsonData = response.body?.string() ?: throw Exception("Empty response body")
+            val jsonObject = JSONObject(jsonData)
+            val searchArray = jsonObject.getJSONArray("Search")
+            val movieList = mutableListOf<Movie>()
 
-        for (i in 0 until searchArray.length()) {
-            val movieObject = searchArray.getJSONObject(i)
-            val title = movieObject.getString("Title")
-            val year = movieObject.getString("Year")
-            val poster = movieObject.getString("Poster")
-            val id = movieObject.getString("imdbID")
-            movieList.add(Movie(title, year, poster, id))
+            for (i in 0 until searchArray.length()) {
+                val movieObject = searchArray.getJSONObject(i)
+                val title = movieObject.getString("Title")
+                val year = movieObject.getString("Year")
+                val poster = movieObject.getString("Poster")
+                val id = movieObject.getString("imdbID")
+                movieList.add(Movie(title, year, poster, id))
+            }
+            return movieList
         }
-        return movieList
-    }
 
-    private fun parseMovieList_New(response: Response): MutableList<Movie> {
+     */
+
+    private fun parseMovieList(response: Response): List<Movie> {
         val jsonData = response.body?.string() ?: throw Exception("Empty response body")
-        // val movieList = mutableListOf<Movie>()
-        val movie = Json.decodeFromString<Movie>(jsonData)
-        return mutableListOf(movie)
+        val movieList = Format.decodeFromString<MovieList>(jsonData)
+        Log.d("tag", movieList.Search.toString())
+        return movieList.Search
     }
 
 

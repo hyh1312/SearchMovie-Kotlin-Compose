@@ -9,8 +9,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Movie(
-    val title: String,
-    val year: String,
-    val posterUrl: String,
-    var id: String
+    val Title: String,
+    val Year: String,
+    val Poster: String,
+    val imdbID: String,
+)
+
+@Serializable
+data class MovieList(
+    val Search: List<Movie>,
 )

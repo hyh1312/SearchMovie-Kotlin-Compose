@@ -152,10 +152,10 @@ open class MovieListBaseActivity : ComponentActivity() {
 
     @Composable
     fun MoviePosterCard(movie: Movie) {
-        val title = movie.title
-        val year = movie.year
-        val id = movie.id
-        val posterUrl = movie.posterUrl
+        val title = movie.Title
+        val year = movie.Year
+        val id = movie.imdbID
+        val posterUrl = movie.Poster
         Row(
             modifier = Modifier
                 .fillMaxWidth()

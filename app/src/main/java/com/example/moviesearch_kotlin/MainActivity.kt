@@ -3,6 +3,7 @@ package com.example.moviesearch_kotlin
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +35,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.moviesearch_kotlin.model.Movie
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 
+@Serializable
+data class Data(val a: Int, val b: String)
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +50,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             MainUi()
         }
+        val json = Json.encodeToString(Data(42, "str"))
+        Log.d("tag", json)
+        val data = Json.decodeFromString<Data>(json)
+        Log.d("tag", data.toString())
     }
 
     @ExperimentalMaterial3Api
