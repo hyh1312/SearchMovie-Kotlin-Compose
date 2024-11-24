@@ -31,10 +31,13 @@ fun AppEntry(modifier: Modifier = Modifier) {
         }
         composable<SearchList> { backStackEntry ->
             val searchList: SearchList = backStackEntry.toRoute()
-            ListMovie(query = searchList.query)
+            ListMovie(query = searchList.query) { query ->
+                navController.navigate(route = DetailList(query))
+            }
         }
-        composable<DetailList> {
-            // ListDetail()
+        composable<DetailList> { backStackEntry ->
+            val detailList: DetailList = backStackEntry.toRoute()
+            ListDetail(detailList.query)
         }
     }
 }

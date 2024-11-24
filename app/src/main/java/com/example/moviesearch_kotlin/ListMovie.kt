@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,11 +55,10 @@ import com.example.moviesearch_kotlin.model.Movie
 import com.example.moviesearch_kotlin.network.OnlineSearchUtil
 import kotlinx.coroutines.launch
 
-@SuppressLint("CoroutineCreationDuringComposition", "ShowToast")
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun ListMovie(query: String = "") {
+fun ListMovie(query: String = "", onClick: (String) -> Unit) {
     val movies: MutableList<Movie> = remember { mutableListOf() }
     var page by remember { mutableStateOf(0) }
     val listState = rememberLazyListState()
@@ -89,7 +89,7 @@ fun ListMovie(query: String = "") {
             state = listState
         ) {
             items(items = movies) { movie ->
-                MoviePosterCard(movie)
+                MoviePosterCard(movie, onClick)
             }
         }
     }
@@ -114,9 +114,8 @@ fun ListMovie(query: String = "") {
                         page + 1
                     ) { isLoading = false }
                     page++;
-                    Log.d("tag", "Load movies")
                 } catch (e: Exception) {
-                    Toast.makeText(context, "出现错误", Toast.LENGTH_LONG)
+                    Toast.makeText(context, "出现错误", Toast.LENGTH_LONG).show()
                     Log.d("tag", "Error: $e")
                     isLoading = false
                 }
@@ -141,7 +140,7 @@ fun CircularProgress() {
 }
 
 @Composable
-fun MoviePosterCard(movie: Movie) {
+fun MoviePosterCard(movie: Movie, onClick: (String) -> Unit) {
     val title = movie.Title
     val year = movie.Year
     val id = movie.imdbID
@@ -150,6 +149,7 @@ fun MoviePosterCard(movie: Movie) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .clickable { onClick(id) }
     ) {
         Image(
             painter = rememberAsyncImagePainter(posterUrl),

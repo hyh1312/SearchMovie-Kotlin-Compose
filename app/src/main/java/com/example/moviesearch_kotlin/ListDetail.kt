@@ -1,5 +1,8 @@
 package com.example.moviesearch_kotlin
 
+import android.annotation.SuppressLint
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,20 +14,50 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import com.example.moviesearch_kotlin.R.drawable.ic_launcher_foreground
 import com.example.moviesearch_kotlin.model.Detail
+import com.example.moviesearch_kotlin.network.OnlineSearchUtil
+import kotlinx.coroutines.launch
+
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+fun ListDetail(id: String) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(true) }
+    if (isLoading) CircularProgress()
+    var detail by remember { mutableStateOf(Detail()) }
+    coroutineScope.launch {
+        try {
+            detail = OnlineSearchUtil.searchDetail(id) { isLoading = false }
+            Log.d("tag", detail.toString())
+        } catch (e: Exception) {
+            Toast.makeText(context, "出现错误", Toast.LENGTH_LONG).show()
+            Log.d("tag", "Error: $e")
+            isLoading = false
+        }
+    }
+    ShowDetail(detail)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListDetail(detail: Detail) {
-    val moviePoster = painterResource(id = ic_launcher_foreground) // 示例图片
+fun ShowDetail(detail: Detail) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Toolbar
         TopAppBar(
@@ -37,7 +70,8 @@ fun ListDetail(detail: Detail) {
                 IconButton(onClick = { /* Do something */ }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
+                        contentDescription = "Back",
+                        tint = Color.White
                     )
                 }
             },
@@ -61,7 +95,7 @@ fun ListDetail(detail: Detail) {
         ) {
             // Movie Poster (这里你可以根据 Poster 的 URL 加载图片)
             Image(
-                painter = moviePoster,
+                painter = rememberAsyncImagePainter(detail.Poster),
                 contentDescription = "Movie Poster",
                 modifier = Modifier
                     .fillMaxWidth()

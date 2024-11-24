@@ -44,6 +44,7 @@ object OnlineSearchUtil {
     suspend fun searchDetail(id: String, stopLoading: () -> Unit): Detail {
         val url = "$URL&i=$id&plot=full"
         val response = fetch(url)
+        stopLoading()
         return parseDetail(response)
     }
 
