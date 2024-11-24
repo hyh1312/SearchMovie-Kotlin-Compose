@@ -52,26 +52,6 @@ object OnlineSearchUtil {
         return parseDetail(response)
     }
 
-    /*
-        private fun parseMovieList_Old(response: Response): List<Movie> {
-            val jsonData = response.body?.string() ?: throw Exception("Empty response body")
-            val jsonObject = JSONObject(jsonData)
-            val searchArray = jsonObject.getJSONArray("Search")
-            val movieList = mutableListOf<Movie>()
-
-            for (i in 0 until searchArray.length()) {
-                val movieObject = searchArray.getJSONObject(i)
-                val title = movieObject.getString("Title")
-                val year = movieObject.getString("Year")
-                val poster = movieObject.getString("Poster")
-                val id = movieObject.getString("imdbID")
-                movieList.add(Movie(title, year, poster, id))
-            }
-            return movieList
-        }
-
-     */
-
     private fun parseMovieList(response: Response): List<Movie> {
         val jsonData = response.body?.string() ?: throw Exception("Empty response body")
         val movieList = Format.decodeFromString<MovieList>(jsonData)

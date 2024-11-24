@@ -1,5 +1,8 @@
 package com.example.moviesearch_kotlin.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Detail(
     val title: String,
     val year: String,
@@ -23,5 +26,5 @@ data class Detail(
     val dvd: String,
     val boxOffice: String,
     val production: String,
-    val website: String
+    val website: String,
 )
