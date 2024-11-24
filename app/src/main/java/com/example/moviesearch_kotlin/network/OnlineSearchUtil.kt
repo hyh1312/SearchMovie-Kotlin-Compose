@@ -18,11 +18,9 @@ import kotlin.coroutines.resumeWithException
 
 object OnlineSearchUtil {
     private const val URL = "https://www.omdbapi.com/?apikey=858fc655"
-    private val client = OkHttpClient()
-    var stopLoading: () -> Unit = { Log.d("tag", "wtf?") }
     val Format = Json { ignoreUnknownKeys = true }
 
-    suspend fun fetch(url: String): String = withContext(Dispatchers.IO) {
+    private suspend fun fetch(url: String): String = withContext(Dispatchers.IO) {
         val client = OkHttpClient()
         val request = Request.Builder().url(url).build()
         val response: Response = client.newCall(request).execute()
@@ -34,14 +32,16 @@ object OnlineSearchUtil {
         }
     }
 
-    suspend fun searchMoviesByPage(name: String, page: Int): List<Movie> {
+    // val exampleMovie = "https://www.omdbapi.com/?apikey=858fc655&s=123"
+    suspend fun searchMoviesByPage(name: String, page: Int, stopLoading: () -> Unit): List<Movie> {
         val url = "$URL&s=$name&page=$page"
         val response = fetch(url)
         stopLoading()
         return parseMovieList(response)
     }
 
-    suspend fun searchDetail(id: String): Detail {
+    // val exampleDetail = "https://www.omdbapi.com/?apikey=858fc655&i=tt1111422&plot=full"
+    suspend fun searchDetail(id: String, stopLoading: () -> Unit): Detail {
         val url = "$URL&i=$id&plot=full"
         val response = fetch(url)
         return parseDetail(response)
@@ -49,37 +49,12 @@ object OnlineSearchUtil {
 
     private fun parseMovieList(jsonData: String): List<Movie> {
         val movieList = Format.decodeFromString<MovieList>(jsonData)
-        Log.d("tag", movieList.Search.toString())
+        // Log.d("tag", movieList.Search.toString())
         return movieList.Search
     }
 
-
     private fun parseDetail(jsonData: String): Detail {
-        val jsonObject = JSONObject(jsonData)
-        return Detail(
-            jsonObject.optString("Title"),
-            jsonObject.optString("Year"),
-            jsonObject.optString("Rated"),
-            jsonObject.optString("Released"),
-            jsonObject.optString("Runtime"),
-            jsonObject.optString("Genre"),
-            jsonObject.optString("Director"),
-            jsonObject.optString("Writer"),
-            jsonObject.optString("Actors"),
-            jsonObject.optString("Plot"),
-            jsonObject.optString("Language"),
-            jsonObject.optString("Country"),
-            jsonObject.optString("Awards"),
-            jsonObject.optString("Poster"),
-            jsonObject.optString("Metascore"),
-            jsonObject.optString("imdbRating"),
-            jsonObject.optString("imdbVotes"),
-            jsonObject.optString("imdbID"),
-            jsonObject.optString("Type"),
-            jsonObject.optString("DVD"),
-            jsonObject.optString("BoxOffice"),
-            jsonObject.optString("Production"),
-            jsonObject.optString("Website")
-        )
+        val detail = Format.decodeFromString<Detail>(jsonData)
+        return detail
     }
 }

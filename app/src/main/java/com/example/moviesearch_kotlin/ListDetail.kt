@@ -9,39 +9,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-import androidx.compose.material3.*
-import androidx.compose.ui.draw.clip
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    MovieInfoScreen()
-}
+import com.example.moviesearch_kotlin.R.drawable.ic_launcher_foreground
+import com.example.moviesearch_kotlin.model.Detail
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieInfoScreen() {
-    val moviePoster = painterResource(id = R.drawable.ic_launcher_foreground) // 示例图片
-    val title = "Title"
-    val yearRatedRuntime = "Year, Rated, Runtime"
-    val genre = "Genre"
-    val plot = "Movie plot goes here."
-    val directorWriterCast = "Director, Writer, and Cast details."
-    val languageCountry = "Language & Country details."
-    val boxOfficeAwards = "Box Office & Awards details."
-    val imdbRatingVotes = "IMDb Rating & Votes details."
-    val productionWebsite = "Production & Website details."
-
+fun ListDetail(detail: Detail) {
+    val moviePoster = painterResource(id = ic_launcher_foreground) // 示例图片
     Box(modifier = Modifier.fillMaxSize()) {
         // Toolbar
         TopAppBar(
@@ -68,13 +51,6 @@ fun MovieInfoScreen() {
             scrollBehavior = null // 可根据需要使用滚动行为
         )
 
-        // Loading spinner (ProgressBar)
-        CircularProgressIndicator(
-            modifier = Modifier
-                .size(60.dp)
-                .align(Alignment.Center)
-        )
-
         // Scrollable content
         Column(
             modifier = Modifier
@@ -83,7 +59,7 @@ fun MovieInfoScreen() {
                 .verticalScroll(rememberScrollState())
                 .padding(top = 56.dp) // To offset the toolbar height
         ) {
-            // Movie Poster
+            // Movie Poster (这里你可以根据 Poster 的 URL 加载图片)
             Image(
                 painter = moviePoster,
                 contentDescription = "Movie Poster",
@@ -96,21 +72,21 @@ fun MovieInfoScreen() {
 
             // Movie Title
             Text(
-                text = title,
+                text = detail.Title,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(top = 16.dp)
             )
 
             // Year, Rated, Runtime
             Text(
-                text = yearRatedRuntime,
+                text = "${detail.Year}, ${detail.Rated}, ${detail.Runtime}",
                 style = MaterialTheme.typography.bodyLarge.copy(color = Color.Gray),
                 modifier = Modifier.padding(top = 8.dp)
             )
 
             // Genre
             Text(
-                text = genre,
+                text = detail.Genre,
                 style = MaterialTheme.typography.bodyLarge.copy(color = Color.Gray),
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -124,7 +100,7 @@ fun MovieInfoScreen() {
 
             // Plot Description
             Text(
-                text = plot,
+                text = detail.Plot,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -138,7 +114,7 @@ fun MovieInfoScreen() {
 
             // Director, Writer & Cast Description
             Text(
-                text = directorWriterCast,
+                text = "Director: ${detail.Director}\nWriter: ${detail.Writer}\nCast: ${detail.Actors}",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -152,7 +128,7 @@ fun MovieInfoScreen() {
 
             // Language & Country Description
             Text(
-                text = languageCountry,
+                text = "${detail.Language}, ${detail.Country}",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -166,7 +142,7 @@ fun MovieInfoScreen() {
 
             // Box Office & Awards Description
             Text(
-                text = boxOfficeAwards,
+                text = "Box Office: ${detail.BoxOffice}\nAwards: ${detail.Awards}",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -180,7 +156,7 @@ fun MovieInfoScreen() {
 
             // IMDb Rating & Votes Description
             Text(
-                text = imdbRatingVotes,
+                text = "Rating: ${detail.imdbRating}\nVotes: ${detail.imdbVotes}",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -194,7 +170,7 @@ fun MovieInfoScreen() {
 
             // Production & Website Description
             Text(
-                text = productionWebsite,
+                text = "Production: ${detail.Production}\nWebsite: ${detail.Website}",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 8.dp)
             )

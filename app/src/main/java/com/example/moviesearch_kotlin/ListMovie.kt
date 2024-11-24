@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,7 +53,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.moviesearch_kotlin.model.Movie
 import com.example.moviesearch_kotlin.network.OnlineSearchUtil
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 @SuppressLint("CoroutineCreationDuringComposition", "ShowToast")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,28 +96,32 @@ fun ListMovie(query: String = "") {
 
     var isLoading by remember { mutableStateOf(true) }
     if (isLoading) CircularProgress()
-    OnlineSearchUtil.stopLoading = { isLoading = false }
-    val coroutineScope = rememberCoroutineScope()
 
+    val coroutineScope = rememberCoroutineScope()
     val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
     val itemCount by remember { derivedStateOf { listState.layoutInfo.totalItemsCount } }
     var lastItemCount by remember { mutableStateOf(itemCount - 1) }
-    if (lastItemCount != itemCount && lastVisibleItem >= itemCount - 1) {
-        lastItemCount = itemCount
-        isLoading = true
 
-        coroutineScope.launch {
-            try {
-                movies += OnlineSearchUtil.searchMoviesByPage(query, page + 1)
-                page++;
-                Log.d("tag", "Load movies")
-            } catch (e: Exception) {
-                Toast.makeText(context, "出现错误", Toast.LENGTH_LONG)
-                Log.d("tag", "Error: $e")
-                isLoading = false
+    LaunchedEffect(lastVisibleItem) {
+        if (lastItemCount != itemCount && lastVisibleItem >= itemCount - 1) {
+            lastItemCount = itemCount
+            isLoading = true
+
+            coroutineScope.launch {
+                try {
+                    movies += OnlineSearchUtil.searchMoviesByPage(
+                        query,
+                        page + 1
+                    ) { isLoading = false }
+                    page++;
+                    Log.d("tag", "Load movies")
+                } catch (e: Exception) {
+                    Toast.makeText(context, "出现错误", Toast.LENGTH_LONG)
+                    Log.d("tag", "Error: $e")
+                    isLoading = false
+                }
             }
         }
-
     }
 
 }

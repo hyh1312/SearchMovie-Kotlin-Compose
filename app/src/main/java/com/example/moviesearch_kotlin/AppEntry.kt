@@ -15,6 +15,9 @@ object HomeRoute
 @Serializable
 data class SearchList(val query: String)
 
+@Serializable
+data class DetailList(val query: String)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppEntry(modifier: Modifier = Modifier) {
@@ -29,6 +32,9 @@ fun AppEntry(modifier: Modifier = Modifier) {
         composable<SearchList> { backStackEntry ->
             val searchList: SearchList = backStackEntry.toRoute()
             ListMovie(query = searchList.query)
+        }
+        composable<DetailList> {
+            // ListDetail()
         }
     }
 }
