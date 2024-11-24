@@ -1,6 +1,8 @@
 package com.example.moviesearch_kotlin
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -47,156 +49,133 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.moviesearch_kotlin.network.OnlineSearchUtil
+import kotlinx.coroutines.runBlocking
 
-open class MovieListBaseActivity : ComponentActivity() {
-    open var movies: MutableList<Movie> = mutableListOf()
-    open var navController: NavHostController? = null
-
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Preview
-    @Composable
-    fun ListMovie() {
-        val listState = rememberLazyListState()
-
-        // val change by remember { mutableStateOf(movies.size) }
-        // 到底怎样你才能重组啊
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = Color.White
-                    ),
-                    title = { Text("电影列表") },
-                    navigationIcon = {
-                        IconButton(onClick = { navController?.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                tint = Color.White,
-                                contentDescription = "Back"
-                            )
-                        }
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun ListMovie(query: String = "") {
+    val movies: MutableList<Movie> = remember { mutableListOf() }
+    var page by remember { mutableStateOf(0) }
+    val listState = rememberLazyListState()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = Color.White
+                ),
+                title = { Text("电影列表") },
+                navigationIcon = {
+                    IconButton(onClick = { /*...*/ }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            tint = Color.White,
+                            contentDescription = "Back"
+                        )
                     }
-                )
-            }
-        ) { innerPadding ->
-            LazyColumn(
-                modifier = Modifier.padding(innerPadding),
-                state = listState
-            ) {
-
-                items(items = movies) { movie ->
-                    MoviePosterCard(movie)
                 }
-            }
-        }
-
-
-        //OnScrollLoader(listState)
-
-        // 他妈的为什么塞进来就行
-        var loading by remember { mutableStateOf(false) }
-        val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-        val itemCount by remember { derivedStateOf { listState.layoutInfo.totalItemsCount } }
-        var lastItemCount by remember { mutableStateOf(itemCount - 1) }
-        if (lastItemCount != itemCount && lastVisibleItem >= itemCount - 1) {
-            lastItemCount = itemCount
-            loading = true
-            loadMore { loading = false }
-        }
-        if (loading) CircularProgress()
-    }
-
-
-    // 他妈的为什么放在函数里就不行
-    @Composable
-    fun OnScrollLoader(listState: LazyListState) {
-        var loading by remember { mutableStateOf(false) }
-        val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-        val itemCount by remember { derivedStateOf { listState.layoutInfo.totalItemsCount } }
-        var lastItemCount by remember { mutableStateOf(itemCount - 1) }
-        // val atBottom by remember { derivedStateOf { lastVisibleItem >= itemCount - 1 } }
-        LaunchedEffect(lastVisibleItem) {
-            Log.d(
-                "tag",
-                "lastVisibleItem:$lastVisibleItem itemCount:$itemCount lastItemCount:$lastItemCount"
             )
         }
-        // 加载出来之前会先触发一次 当作特性了
-        if (lastItemCount != itemCount && lastVisibleItem >= itemCount - 1) {
-            lastItemCount = itemCount
-            loading = true
-            loadMore { loading = false }
-        }
-        if (loading) CircularProgress()
-    }
-
-
-    @Preview
-    @Composable
-    fun CircularProgress() {
-        Box(Modifier.fillMaxSize()) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(64.dp)
-                    .align(Alignment.Center),
-                color = MaterialTheme.colorScheme.secondary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            )
-        }
-    }
-
-    @Composable
-    fun MoviePosterCard(movie: Movie) {
-        val title = movie.Title
-        val year = movie.Year
-        val id = movie.imdbID
-        val posterUrl = movie.Poster
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier.padding(innerPadding),
+            state = listState
         ) {
-            Image(
-                painter = rememberAsyncImagePainter(posterUrl),
-                contentDescription = null,
-                modifier = Modifier
-                    .width(160.dp)
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop,
-            )
-
-            Spacer(Modifier.padding(8.dp))
-
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    text = title,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = "首映时间：",
-                    fontSize = 16.sp,
-                )
-                Text(
-                    text = year,
-                    fontSize = 16.sp
-                )
+            items(items = movies) { movie ->
+                MoviePosterCard(movie)
             }
         }
     }
 
-    open fun loadMore(stopLoading: () -> Unit) {}
+    //OnScrollLoader(listState)
+    // 为什么塞进来就行，放进函数里就不能更新
+    var loading by remember { mutableStateOf(false) }
+    val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+    val itemCount by remember { derivedStateOf { listState.layoutInfo.totalItemsCount } }
+    var lastItemCount by remember { mutableStateOf(itemCount - 1) }
+    if (lastItemCount != itemCount && lastVisibleItem >= itemCount - 1) {
+        lastItemCount = itemCount
+        loading = true
+        val stopLoading = { loading = false }
+        runBlocking {
+            OnlineSearchUtil.stopLoading = stopLoading
+            try {
+                movies += OnlineSearchUtil.searchMoviesByPage(query, page + 1)
+                page++;
+                Log.d("tag", "Load movies")
+            } catch (e: Exception) {
+                // Toast.makeText(LocalContext.current, "未找到电影", Toast.LENGTH_SHORT).show()
+                Log.d("tag", "Error: ${e.message}")
+                stopLoading()
+            }
+        }
+
+    }
+    if (loading) CircularProgress()
 }
 
+@Preview
+@Composable
+fun CircularProgress() {
+    Box(Modifier.fillMaxSize()) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(64.dp)
+                .align(Alignment.Center),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+    }
+}
 
+@Composable
+fun MoviePosterCard(movie: Movie) {
+    val title = movie.Title
+    val year = movie.Year
+    val id = movie.imdbID
+    val posterUrl = movie.Poster
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(posterUrl),
+            contentDescription = null,
+            modifier = Modifier
+                .width(160.dp)
+                .height(120.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop,
+        )
+
+        Spacer(Modifier.padding(8.dp))
+
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = title,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "首映时间：",
+                fontSize = 16.sp,
+            )
+            Text(
+                text = year,
+                fontSize = 16.sp
+            )
+        }
+    }
+}
