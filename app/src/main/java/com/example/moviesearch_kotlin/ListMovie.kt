@@ -1,6 +1,8 @@
 package com.example.moviesearch_kotlin
 
+import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,12 +36,14 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,8 +51,10 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.moviesearch_kotlin.model.Movie
 import com.example.moviesearch_kotlin.network.OnlineSearchUtil
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+@SuppressLint("CoroutineCreationDuringComposition", "ShowToast")
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
@@ -56,6 +62,8 @@ fun ListMovie(query: String = "") {
     val movies: MutableList<Movie> = remember { mutableListOf() }
     var page by remember { mutableStateOf(0) }
     val listState = rememberLazyListState()
+    val context = LocalContext.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -86,31 +94,32 @@ fun ListMovie(query: String = "") {
         }
     }
 
-    //OnScrollLoader(listState)
-    // 为什么塞进来就行，放进函数里就不能更新
-    var loading by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+    if (isLoading) CircularProgress()
+    OnlineSearchUtil.stopLoading = { isLoading = false }
+    val coroutineScope = rememberCoroutineScope()
+
     val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
     val itemCount by remember { derivedStateOf { listState.layoutInfo.totalItemsCount } }
     var lastItemCount by remember { mutableStateOf(itemCount - 1) }
     if (lastItemCount != itemCount && lastVisibleItem >= itemCount - 1) {
         lastItemCount = itemCount
-        loading = true
-        val stopLoading = { loading = false }
-        runBlocking {
-            OnlineSearchUtil.stopLoading = stopLoading
+        isLoading = true
+
+        coroutineScope.launch {
             try {
                 movies += OnlineSearchUtil.searchMoviesByPage(query, page + 1)
                 page++;
                 Log.d("tag", "Load movies")
             } catch (e: Exception) {
-                // Toast.makeText(LocalContext.current, "未找到电影", Toast.LENGTH_SHORT).show()
-                Log.d("tag", "Error: ${e.message}")
-                stopLoading()
+                Toast.makeText(context, "出现错误", Toast.LENGTH_LONG)
+                Log.d("tag", "Error: $e")
+                isLoading = false
             }
         }
 
     }
-    if (loading) CircularProgress()
+
 }
 
 @Preview

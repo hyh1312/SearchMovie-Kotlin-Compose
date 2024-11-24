@@ -62,12 +62,10 @@ fun HomePage(
         ) {
             var query by remember { mutableStateOf("") }
             val context = LocalContext.current
-            SearchTextField(
-                Modifier.fillMaxWidth(),
-                query,
-                { newText -> query = newText },
-                SearchMovie
-            )
+            SearchTextField(Modifier.fillMaxWidth(), query, SearchMovie) { newText ->
+                query = newText
+            }
+
             SearchButton(
                 { SearchMovie(query) },
                 Modifier
@@ -87,7 +85,6 @@ fun SearchButton(
     Button(
         onClick = onClick,
         modifier = modifier
-
     ) {
         Text(text = "搜索", fontSize = 20.sp)
     }
@@ -96,8 +93,9 @@ fun SearchButton(
 @Composable
 fun SearchTextField(
     modifier: Modifier,
-    text: String, onValueChange: (String) -> Unit,
+    text: String,
     SearchMovie: (String) -> Unit,
+    onValueChange: (String) -> Unit,
 ) {
     val context = LocalContext.current
     TextField(

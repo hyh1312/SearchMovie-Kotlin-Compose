@@ -22,9 +22,9 @@ fun AppEntry(modifier: Modifier = Modifier) {
 
     NavHost(navController, startDestination = HomeRoute) {
         composable<HomeRoute> {
-            HomePage(SearchMovie = { query ->
+            HomePage { query ->
                 navController.navigate(route = SearchList(query))
-            })
+            }
         }
         composable<SearchList> { backStackEntry ->
             val searchList: SearchList = backStackEntry.toRoute()

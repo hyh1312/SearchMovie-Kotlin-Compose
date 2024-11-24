@@ -1,10 +1,13 @@
 package com.example.moviesearch_kotlin.network
 
+import android.net.http.NetworkException
 import android.util.Log
 import com.example.moviesearch_kotlin.model.Detail
 import com.example.moviesearch_kotlin.model.Movie
 import com.example.moviesearch_kotlin.model.MovieList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -19,24 +22,16 @@ object OnlineSearchUtil {
     var stopLoading: () -> Unit = { Log.d("tag", "wtf?") }
     val Format = Json { ignoreUnknownKeys = true }
 
-    private suspend fun fetch(url: String): Response = suspendCancellableCoroutine { cont ->
-        val request = Request.Builder().url(url).get().build()
-        val call = client.newCall(request)
-        cont.invokeOnCancellation { call.cancel() }
+    suspend fun fetch(url: String): String = withContext(Dispatchers.IO) {
+        val client = OkHttpClient()
+        val request = Request.Builder().url(url).build()
+        val response: Response = client.newCall(request).execute()
 
-        call.enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
-                cont.resumeWithException(e)
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: Response) {
-                if (response.isSuccessful) {
-                    cont.resume(response)
-                } else {
-                    cont.resumeWithException(Exception("HTTP error: ${response.code}"))
-                }
-            }
-        })
+        if (response.isSuccessful) {
+            return@withContext response.body?.string() ?: ""
+        } else {
+            throw Exception("Error: ${response.code}")
+        }
     }
 
     suspend fun searchMoviesByPage(name: String, page: Int): List<Movie> {
@@ -52,16 +47,14 @@ object OnlineSearchUtil {
         return parseDetail(response)
     }
 
-    private fun parseMovieList(response: Response): List<Movie> {
-        val jsonData = response.body?.string() ?: throw Exception("Empty response body")
+    private fun parseMovieList(jsonData: String): List<Movie> {
         val movieList = Format.decodeFromString<MovieList>(jsonData)
         Log.d("tag", movieList.Search.toString())
         return movieList.Search
     }
 
 
-    private fun parseDetail(response: Response): Detail {
-        val jsonData = response.body?.string() ?: throw Exception("Empty response body")
+    private fun parseDetail(jsonData: String): Detail {
         val jsonObject = JSONObject(jsonData)
         return Detail(
             jsonObject.optString("Title"),
