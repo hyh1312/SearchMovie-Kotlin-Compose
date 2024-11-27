@@ -1,4 +1,4 @@
-package com.example.moviesearch_kotlin
+package com.example.moviesearch_kotlin.ui
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,9 +59,9 @@ import kotlinx.coroutines.launch
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListMovie(query: String = "", onClick: (String) -> Unit) {
+fun ListMovies(query: String = "", toDetail: (String) -> Unit, goBack: () -> Unit) {
     val movies: MutableList<Movie> = remember { mutableListOf() }
-    var page by remember { mutableStateOf(0) }
+    var page by remember { mutableIntStateOf(0) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
 
@@ -73,7 +74,7 @@ fun ListMovie(query: String = "", onClick: (String) -> Unit) {
                 ),
                 title = { Text("电影列表") },
                 navigationIcon = {
-                    IconButton(onClick = { /*...*/ }) {
+                    IconButton(onClick = goBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             tint = Color.White,
@@ -89,7 +90,7 @@ fun ListMovie(query: String = "", onClick: (String) -> Unit) {
             state = listState
         ) {
             items(items = movies) { movie ->
-                MoviePosterCard(movie, onClick)
+                MoviePosterCard(movie, toDetail)
             }
         }
     }

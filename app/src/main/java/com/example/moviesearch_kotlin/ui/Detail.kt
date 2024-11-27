@@ -1,4 +1,4 @@
-package com.example.moviesearch_kotlin
+package com.example.moviesearch_kotlin.ui
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -10,11 +10,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,18 +22,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.example.moviesearch_kotlin.R.drawable.ic_launcher_foreground
 import com.example.moviesearch_kotlin.model.Detail
 import com.example.moviesearch_kotlin.network.OnlineSearchUtil
 import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun ListDetail(id: String) {
+fun ListDetail(id: String, goBack: () -> Unit) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(true) }
@@ -52,46 +47,40 @@ fun ListDetail(id: String) {
             isLoading = false
         }
     }
-    ShowDetail(detail)
+    ShowDetail(detail, goBack)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowDetail(detail: Detail) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Toolbar
-        TopAppBar(
-            title = {
-                Text(text = "电影信息", color = Color.White)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            navigationIcon = {
-                // 可以在这里添加导航图标，如返回按钮
-                IconButton(onClick = { /* Do something */ }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-            },
-            actions = {
-                // 这里可以添加操作按钮
-                IconButton(onClick = { /* Do something */ }) {
-                    Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary),
-            scrollBehavior = null // 可根据需要使用滚动行为
-        )
-
+fun ShowDetail(detail: Detail, goBack: () -> Unit) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = Color.White
+                ),
+                title = { Text(text = "电影信息") },
+                modifier = Modifier.fillMaxWidth(),
+                navigationIcon = {
+                    IconButton(onClick = goBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
+                    }
+                },
+            )
+        }
+    ) { innerPadding ->
         // Scrollable content
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(10.dp)
+                .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(top = 56.dp) // To offset the toolbar height
+                .padding(16.dp)
         ) {
             // Movie Poster (这里你可以根据 Poster 的 URL 加载图片)
             Image(

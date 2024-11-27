@@ -1,6 +1,5 @@
-package com.example.moviesearch_kotlin
+package com.example.moviesearch_kotlin.ui
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +34,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun HomePage(
     modifier: Modifier = Modifier,
-    SearchMovie: (String) -> Unit,
+    searchMovie: (String) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -62,12 +61,12 @@ fun HomePage(
         ) {
             var query by remember { mutableStateOf("") }
             val context = LocalContext.current
-            SearchTextField(Modifier.fillMaxWidth(), query, SearchMovie) { newText ->
+            SearchTextField(Modifier.fillMaxWidth(), query, searchMovie) { newText ->
                 query = newText
             }
 
             SearchButton(
-                { SearchMovie(query) },
+                { searchMovie(query) },
                 Modifier
                     .padding(30.dp)
                     .fillMaxWidth()

@@ -7,16 +7,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.moviesearch_kotlin.ui.HomePage
+import com.example.moviesearch_kotlin.ui.ListDetail
+import com.example.moviesearch_kotlin.ui.ListMovies
 import kotlinx.serialization.Serializable
 
 @Serializable
 object HomeRoute
 
 @Serializable
-data class SearchList(val query: String)
+data class SearchResult(val query: String)
 
 @Serializable
-data class DetailList(val query: String)
+data class MovieDetail(val query: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,18 +29,20 @@ fun AppEntry(modifier: Modifier = Modifier) {
     NavHost(navController, startDestination = HomeRoute) {
         composable<HomeRoute> {
             HomePage { query ->
-                navController.navigate(route = SearchList(query))
+                navController.navigate(route = SearchResult(query))
             }
         }
-        composable<SearchList> { backStackEntry ->
-            val searchList: SearchList = backStackEntry.toRoute()
-            ListMovie(query = searchList.query) { query ->
-                navController.navigate(route = DetailList(query))
-            }
+        composable<SearchResult> { backStackEntry ->
+            val searchList: SearchResult = backStackEntry.toRoute()
+            ListMovies(
+                query = searchList.query,
+                { query -> navController.navigate(route = MovieDetail(query)) }
+            ) { navController.navigateUp() }
+
         }
-        composable<DetailList> { backStackEntry ->
-            val detailList: DetailList = backStackEntry.toRoute()
-            ListDetail(detailList.query)
+        composable<MovieDetail> { backStackEntry ->
+            val detailList: MovieDetail = backStackEntry.toRoute()
+            ListDetail(detailList.query) { navController.navigateUp() }
         }
     }
 }
