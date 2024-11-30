@@ -24,12 +24,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.room.util.query
 import coil.compose.rememberAsyncImagePainter
 import com.example.moviesearch_kotlin.model.Movie
+import com.example.moviesearch_kotlin.model.dao
 
 @Composable
 fun ShowMovies(
-    movies: MutableList<Movie>,
+    movies: List<Movie>,
     toDetail: (String) -> Unit,
     modifier: Modifier,
     listState: LazyListState = rememberLazyListState(),
@@ -55,7 +57,10 @@ fun MoviePosterCard(movie: Movie, onClick: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .clickable { onClick(id) }
+            .clickable {
+                onClick(id)
+                dao.insert(movie)
+            }
     ) {
         Image(
             painter = rememberAsyncImagePainter(posterUrl),

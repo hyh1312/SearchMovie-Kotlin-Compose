@@ -50,7 +50,8 @@ fun AppEntry(modifier: Modifier = Modifier) {
         }
         composable<HistoryPage> { backStackEntry ->
             val historyPage: HistoryPage = backStackEntry.toRoute()
-            HistoryPage()
+            HistoryPage(toDetail = { query -> navController.navigate(route = InfoPage(query)) }
+            ) { navController.navigateUp() }
         }
     }
 }
