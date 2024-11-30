@@ -28,10 +28,11 @@ import kotlinx.coroutines.launch
 fun SearchPage(query: String = "", toDetail: (String) -> Unit, goBack: () -> Unit) {
     val movies: MutableList<Movie> = remember { mutableListOf() }
     var page by remember { mutableIntStateOf(0) }
-    val listState = rememberLazyListState()
-    val context = LocalContext.current
     var isLoading by remember { mutableStateOf(true) }
-    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+
+    val listState = rememberLazyListState()
     val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
     val itemCount by remember { derivedStateOf { listState.layoutInfo.totalItemsCount } }
     var lastItemCount by remember { mutableStateOf(itemCount - 1) }
@@ -40,19 +41,16 @@ fun SearchPage(query: String = "", toDetail: (String) -> Unit, goBack: () -> Uni
         if (lastItemCount != itemCount && lastVisibleItem >= itemCount - 1) {
             lastItemCount = itemCount
             isLoading = true
-
-            coroutineScope.launch {
-                try {
-                    movies += OnlineSearchUtil.searchMoviesByPage(
-                        query,
-                        page + 1
-                    ) { isLoading = false }
-                    page++;
-                } catch (e: Exception) {
-                    Toast.makeText(context, "没有更多了", Toast.LENGTH_LONG).show()
-                    Log.d("tag", "Error: $e")
-                    isLoading = false
-                }
+            try {
+                movies += OnlineSearchUtil.searchMoviesByPage(
+                    query,
+                    page + 1
+                ) { isLoading = false }
+                page++;
+            } catch (e: Exception) {
+                Toast.makeText(context, "没有更多了", Toast.LENGTH_LONG).show()
+                Log.d("tag", "Error: $e")
+                isLoading = false
             }
         }
     }
