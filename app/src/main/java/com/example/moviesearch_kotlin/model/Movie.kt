@@ -1,18 +1,16 @@
 package com.example.moviesearch_kotlin.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
-////import androidx.room.Entity
-////import androidx.room.PrimaryKey
-//
-//@Entity(tableName = "movie_table")
-
+@Entity(tableName = "movie_table")
 @Serializable
 data class Movie(
+    @PrimaryKey val imdbID: String,
     val Title: String,
     val Year: String,
     val Poster: String,
-    val imdbID: String,
 )
 
 @Serializable
