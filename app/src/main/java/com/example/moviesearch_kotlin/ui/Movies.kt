@@ -1,5 +1,6 @@
 package com.example.moviesearch_kotlin.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,24 +19,28 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.room.util.query
 import coil.compose.rememberAsyncImagePainter
 import com.example.moviesearch_kotlin.model.Movie
 import com.example.moviesearch_kotlin.model.dao
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun ShowMovies(
-    movies: List<Movie>,
+    movies: MutableList<Movie>,
     toDetail: (String) -> Unit,
     modifier: Modifier,
     listState: LazyListState = rememberLazyListState(),
 ) {
+    //Log.d("tag", movies.toString())
     LazyColumn(
         modifier = modifier,
         state = listState
@@ -53,13 +58,14 @@ fun MoviePosterCard(movie: Movie, onClick: (String) -> Unit) {
     val year = movie.Year
     val id = movie.imdbID
     val posterUrl = movie.Poster
+    val coroutineScope: CoroutineScope = rememberCoroutineScope()
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .clickable {
                 onClick(id)
-                dao.insert(movie)
+                coroutineScope.launch { dao.insert(movie) }
             }
     ) {
         Image(

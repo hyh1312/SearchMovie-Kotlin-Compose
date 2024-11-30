@@ -17,7 +17,7 @@ import com.example.moviesearch_kotlin.ui.ShowMovies
 @Composable
 fun HistoryPage(toDetail: (String) -> Unit, goBack: () -> Unit) {
     var isLoading by remember { mutableStateOf(true) }
-    var movieList: List<Movie> = remember { listOf() }
+    var movieList: MutableList<Movie> = remember { mutableListOf() }
 
     AppBar("浏览记录", goBack) { innerPadding ->
         ShowMovies(movieList, toDetail, Modifier.padding(innerPadding))
@@ -26,7 +26,7 @@ fun HistoryPage(toDetail: (String) -> Unit, goBack: () -> Unit) {
 
     LaunchedEffect(true) {
         dao.getAll().collect { movies ->
-            movieList = movies.reversed()
+            movieList = movies.reversed().toMutableList()
             isLoading = false
         }
     }

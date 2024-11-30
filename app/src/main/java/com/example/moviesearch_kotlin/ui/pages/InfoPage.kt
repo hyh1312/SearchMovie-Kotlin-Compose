@@ -51,7 +51,6 @@ fun InfoPage(id: String, goBack: () -> Unit) {
         ShowDetail(innerPadding, detail)
         if (isLoading) CircularProgress()
     }
-
 }
 
 @Composable

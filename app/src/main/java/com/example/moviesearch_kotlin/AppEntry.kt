@@ -32,9 +32,9 @@ fun AppEntry(modifier: Modifier = Modifier) {
 
     NavHost(navController, startDestination = HomeRoute) {
         composable<HomeRoute> {
-            HomePage { query ->
+            HomePage(searchMovie = { query ->
                 navController.navigate(route = SearchPage(query))
-            }
+            }, history = { navController.navigate(route = HistoryPage) })
         }
         composable<SearchPage> { backStackEntry ->
             val searchPage: SearchPage = backStackEntry.toRoute()
@@ -48,8 +48,7 @@ fun AppEntry(modifier: Modifier = Modifier) {
             val infoPage: InfoPage = backStackEntry.toRoute()
             InfoPage(infoPage.query) { navController.navigateUp() }
         }
-        composable<HistoryPage> { backStackEntry ->
-            val historyPage: HistoryPage = backStackEntry.toRoute()
+        composable<HistoryPage> {
             HistoryPage(toDetail = { query -> navController.navigate(route = InfoPage(query)) }
             ) { navController.navigateUp() }
         }

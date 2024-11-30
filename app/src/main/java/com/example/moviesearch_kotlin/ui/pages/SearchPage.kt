@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,7 +27,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun SearchPage(query: String = "", toDetail: (String) -> Unit, goBack: () -> Unit) {
-    val movies: MutableList<Movie> = remember { mutableListOf() }
+    val movies: MutableList<Movie> = remember { mutableStateListOf() }
     var page by remember { mutableIntStateOf(0) }
     var isLoading by remember { mutableStateOf(true) }
     val context = LocalContext.current
@@ -35,7 +36,7 @@ fun SearchPage(query: String = "", toDetail: (String) -> Unit, goBack: () -> Uni
     val listState = rememberLazyListState()
     val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
     val itemCount by remember { derivedStateOf { listState.layoutInfo.totalItemsCount } }
-    var lastItemCount by remember { mutableStateOf(itemCount - 1) }
+    var lastItemCount by remember { mutableIntStateOf(itemCount - 1) }
 
     LaunchedEffect(lastVisibleItem) {
         if (lastItemCount != itemCount && lastVisibleItem >= itemCount - 1) {
@@ -46,7 +47,7 @@ fun SearchPage(query: String = "", toDetail: (String) -> Unit, goBack: () -> Uni
                     query,
                     page + 1
                 ) { isLoading = false }
-                page++;
+                page++
             } catch (e: Exception) {
                 Toast.makeText(context, "没有更多了", Toast.LENGTH_LONG).show()
                 Log.d("tag", "Error: $e")

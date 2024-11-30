@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MovieDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(Movie: Movie)
+    suspend fun insert(Movie: Movie)
 
     @Query("SELECT * FROM movie_table")
     fun getAll(): Flow<List<Movie>>
