@@ -1,4 +1,4 @@
-package com.example.moviesearch_kotlin.ui
+package com.example.moviesearch_kotlin.ui.pages
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,28 +28,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.moviesearch_kotlin.ui.AppBar
 
 
 @ExperimentalMaterial3Api
 @Composable
 fun HomePage(
-    modifier: Modifier = Modifier,
     searchMovie: (String) -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
-                ),
-                title = { Text("小 H 的电影搜索") }
-            )
-        },
-        bottomBar = {
-            // 之后在写导航吧。。。
-        }
-    ) { innerPadding ->
+    AppBar("小 H 的电影搜索") { innerPadding ->
         Column(
             verticalArrangement = Arrangement.spacedBy(40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -60,11 +47,9 @@ fun HomePage(
 
         ) {
             var query by remember { mutableStateOf("") }
-            val context = LocalContext.current
             SearchTextField(Modifier.fillMaxWidth(), query, searchMovie) { newText ->
                 query = newText
             }
-
             SearchButton(
                 { searchMovie(query) },
                 Modifier
@@ -93,7 +78,7 @@ fun SearchButton(
 fun SearchTextField(
     modifier: Modifier,
     text: String,
-    SearchMovie: (String) -> Unit,
+    searchMovies: (String) -> Unit,
     onValueChange: (String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -108,7 +93,7 @@ fun SearchTextField(
         ),
         keyboardActions = KeyboardActions(
             onSearch = {
-                SearchMovie(text) // 回车键触发搜索
+                searchMovies(text) // 回车键触发搜索
             }
         )
     )
