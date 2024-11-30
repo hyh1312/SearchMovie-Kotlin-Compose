@@ -9,7 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.moviesearch_kotlin.ui.pages.HistoryPage
 import com.example.moviesearch_kotlin.ui.pages.HomePage
-import com.example.moviesearch_kotlin.ui.MovieInfo
+import com.example.moviesearch_kotlin.ui.pages.InfoPage
 import com.example.moviesearch_kotlin.ui.pages.SearchPage
 import kotlinx.serialization.Serializable
 
@@ -20,7 +20,7 @@ object HomeRoute
 data class SearchPage(val query: String)
 
 @Serializable
-data class MovieInfo(val query: String)
+data class InfoPage(val query: String)
 
 @Serializable
 object HistoryPage
@@ -40,13 +40,13 @@ fun AppEntry(modifier: Modifier = Modifier) {
             val searchPage: SearchPage = backStackEntry.toRoute()
             SearchPage(
                 query = searchPage.query,
-                toDetail = { query -> navController.navigate(route = MovieInfo(query)) }
+                toDetail = { query -> navController.navigate(route = InfoPage(query)) }
             ) { navController.navigateUp() }
 
         }
-        composable<MovieInfo> { backStackEntry ->
-            val movieInfo: MovieInfo = backStackEntry.toRoute()
-            MovieInfo(movieInfo.query) { navController.navigateUp() }
+        composable<InfoPage> { backStackEntry ->
+            val infoPage: InfoPage = backStackEntry.toRoute()
+            InfoPage(infoPage.query) { navController.navigateUp() }
         }
         composable<HistoryPage> { backStackEntry ->
             val historyPage: HistoryPage = backStackEntry.toRoute()

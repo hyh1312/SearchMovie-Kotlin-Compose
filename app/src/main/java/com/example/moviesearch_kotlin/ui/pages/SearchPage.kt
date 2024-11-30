@@ -3,6 +3,7 @@ package com.example.moviesearch_kotlin.ui.pages
 import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,9 +14,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.moviesearch_kotlin.model.Movie
 import com.example.moviesearch_kotlin.network.OnlineSearchUtil
+import com.example.moviesearch_kotlin.ui.AppBar
 import com.example.moviesearch_kotlin.ui.CircularProgress
 import com.example.moviesearch_kotlin.ui.ShowMovies
 import kotlinx.coroutines.launch
@@ -27,12 +30,7 @@ fun SearchPage(query: String = "", toDetail: (String) -> Unit, goBack: () -> Uni
     var page by remember { mutableIntStateOf(0) }
     val listState = rememberLazyListState()
     val context = LocalContext.current
-
-    ShowMovies(movies, toDetail, goBack, listState, "搜索结果")
-
     var isLoading by remember { mutableStateOf(true) }
-    if (isLoading) CircularProgress()
-
     val coroutineScope = rememberCoroutineScope()
     val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
     val itemCount by remember { derivedStateOf { listState.layoutInfo.totalItemsCount } }
@@ -57,6 +55,11 @@ fun SearchPage(query: String = "", toDetail: (String) -> Unit, goBack: () -> Uni
                 }
             }
         }
+    }
+
+    AppBar("搜索结果", goBack) { innerPadding ->
+        ShowMovies(movies, toDetail, Modifier.padding(innerPadding), listState)
+        if (isLoading) CircularProgress()
     }
 }
 

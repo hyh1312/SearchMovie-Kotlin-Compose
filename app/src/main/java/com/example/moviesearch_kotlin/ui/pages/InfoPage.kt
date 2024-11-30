@@ -1,4 +1,4 @@
-package com.example.moviesearch_kotlin.ui
+package com.example.moviesearch_kotlin.ui.pages
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -8,10 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,21 +26,20 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.moviesearch_kotlin.model.Detail
 import com.example.moviesearch_kotlin.network.OnlineSearchUtil
-import kotlinx.coroutines.launch
+import com.example.moviesearch_kotlin.ui.AppBar
+import com.example.moviesearch_kotlin.ui.CircularProgress
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun MovieInfo(id: String, goBack: () -> Unit) {
+fun InfoPage(id: String, goBack: () -> Unit) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(true) }
-    if (isLoading) CircularProgress()
     var detail by remember { mutableStateOf(Detail()) }
 
-    // 这里有问题
-    coroutineScope.launch {
+    LaunchedEffect(true) {
         try {
             detail = OnlineSearchUtil.searchDetail(id) { isLoading = false }
+
         } catch (e: Exception) {
             Toast.makeText(context, "出现错误", Toast.LENGTH_SHORT).show()
             Log.d("tag", "Error: $e")
@@ -51,7 +49,9 @@ fun MovieInfo(id: String, goBack: () -> Unit) {
 
     AppBar("电影详情", goBack) { innerPadding ->
         ShowDetail(innerPadding, detail)
+        if (isLoading) CircularProgress()
     }
+
 }
 
 @Composable

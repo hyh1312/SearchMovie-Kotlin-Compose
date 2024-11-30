@@ -31,18 +31,15 @@ import com.example.moviesearch_kotlin.model.Movie
 fun ShowMovies(
     movies: MutableList<Movie>,
     toDetail: (String) -> Unit,
-    goBack: () -> Unit,
+    modifier: Modifier,
     listState: LazyListState = rememberLazyListState(),
-    title: String = "电影列表",
 ) {
-    AppBar(title, goBack) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.padding(innerPadding),
-            state = listState
-        ) {
-            items(items = movies) { movie ->
-                MoviePosterCard(movie, toDetail)
-            }
+    LazyColumn(
+        modifier = modifier,
+        state = listState
+    ) {
+        items(items = movies) { movie ->
+            MoviePosterCard(movie, toDetail)
         }
     }
 }
